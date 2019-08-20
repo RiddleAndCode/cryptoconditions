@@ -29,6 +29,10 @@
           publicKey            OCTET STRING (SIZE(32))
         }
 
+        ZenroomFingerprintContents ::= SEQUENCE {
+          publicKey            OCTET STRING (SIZE(32))
+        }
+
     END
 
 """
@@ -42,6 +46,15 @@ from cryptoconditions.schemas.condition import Condition
 
 
 class Ed25519FingerprintContents(Sequence):
+    componentType = NamedTypes(
+        NamedType(
+            'publicKey',
+            OctetString().subtype(
+                subtypeSpec=ValueSizeConstraint(32, 32)).subtype(
+                    implicitTag=Tag(tagClassContext, tagFormatSimple, 0))),
+    )
+
+class ZenroomFingerprintContents(Sequence):
     componentType = NamedTypes(
         NamedType(
             'publicKey',

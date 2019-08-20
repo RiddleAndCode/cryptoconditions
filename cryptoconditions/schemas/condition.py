@@ -12,6 +12,7 @@
           thresholdSha256  [2] CompoundSha256Condition,
           rsaSha256        [3] SimpleSha256Condition,
           ed25519Sha256    [4] SimpleSha256Condition
+          zenroomSha256    [5] SimpleSha256Condition
         }
 
         SimpleSha256Condition ::= SEQUENCE {
@@ -30,7 +31,8 @@
           prefixSha256     (1),
           thresholdSha256  (2),
           rsaSha256        (3),
-          ed25519Sha256    (4)
+          ed25519Sha256    (4),
+          zenroomSha256    (5)
         }
 
     END
@@ -51,6 +53,7 @@ class ConditionTypes(BitString):
         ('thresholdSha256', 2),
         ('rsaSha256', 3),
         ('ed25519Sha256', 4),
+        ('zenroomSha256', 5),
     )
 
 
@@ -110,4 +113,8 @@ class Condition(Choice):
             'ed25519Sha256',
             SimpleSha256Condition().subtype(
                 implicitTag=Tag(tagClassContext, tagFormatConstructed, 4))),
+        NamedType(
+            'zenroomSha256',
+            SimpleSha256Condition().subtype(
+                implicitTag=Tag(tagClassContext, tagFormatConstructed, 5))),
     )
