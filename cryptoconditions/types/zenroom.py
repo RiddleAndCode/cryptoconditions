@@ -64,7 +64,7 @@ class ZenroomSha256(BaseSha256):
 
     @property
     def data(self):
-        return self._data
+        return self._data or b''
 
     @data.setter
     def data(self, data):
@@ -76,7 +76,7 @@ class ZenroomSha256(BaseSha256):
 
     @property
     def keys(self):
-        return self._keys
+        return self._keys or b''
 
     @keys.setter
     def keys(self, keys):
@@ -88,7 +88,7 @@ class ZenroomSha256(BaseSha256):
 
     @property
     def conf(self):
-        return self._conf
+        return self._conf or b''
 
     @conf.setter
     def conf(self, conf):
@@ -97,7 +97,12 @@ class ZenroomSha256(BaseSha256):
 
     @property
     def asn1_dict_payload(self):
-        return {'script': self.script}
+        return {
+            'script': self.script,
+            'data': self.data,
+            'keys': self.keys,
+            'conf': self.conf,
+        }
 
     @property
     def fingerprint_contents(self):
@@ -127,6 +132,9 @@ class ZenroomSha256(BaseSha256):
         return {
             'type': ZenroomSha256.TYPE_NAME,
             'script': base58.b58encode(self.script),
+            'data': base58.b58encode(self.data),
+            'keys': base58.b58encode(self.keys),
+            'conf': base58.b58encode(self.conf),
         }
 
     # TODO Adapt according to outcomes of
@@ -141,7 +149,13 @@ class ZenroomSha256(BaseSha256):
         return {
             'type': ZenroomSha256.TYPE_NAME,
             'script': base64_remove_padding(
-                urlsafe_b64encode(self.public_key)),
+                urlsafe_b64encode(self.script)),
+            'data': base64_remove_padding(
+                urlsafe_b64encode(self.data)),
+            'keys': base64_remove_padding(
+                urlsafe_b64encode(self.keys)),
+            'conf': base64_remove_padding(
+                urlsafe_b64encode(self.conf)),
         }
 
     # TODO Adapt according to outcomes of
@@ -157,6 +171,9 @@ class ZenroomSha256(BaseSha256):
             Fulfillment
         """
         self.script = base58.b58decode(data['script'])
+        self.data = base58.b58decode(data['data'])
+        self.keys = base58.b58decode(data['keys'])
+        self.conf = base58.b58decode(data['conf'])
 
     # TODO Adapt according to outcomes of
     # https://github.com/rfcs/crypto-conditions/issues/16
@@ -172,11 +189,20 @@ class ZenroomSha256(BaseSha256):
         """
         self.script = urlsafe_b64decode(base64_add_padding(
             data['script']))
+        self.data = urlsafe_b64decode(base64_add_padding(
+            data['data']))
+        self.keys = urlsafe_b64decode(base64_add_padding(
+            data['keys']))
+        self.conf = urlsafe_b64decode(base64_add_padding(
+            data['conf']))
 
     def parse_asn1_dict_payload(self, data):
         self.script = data['script']
+        self.data = data['data']
+        self.keys = data['keys']
+        self.conf = data['conf']
 
-    def validate(self, message):
+    def validate(self, *, message):
         """
         Verify the signature of this Zenroom fulfillment.
 
@@ -189,8 +215,17 @@ class ZenroomSha256(BaseSha256):
         Return:
             boolean: Whether this fulfillment is valid.
         """
+        print(self.script)
+        print(self.data)
+        print(self.keys)
+        print(self.conf)
         try:
-            result, errors = zencode_exec(self.script.decode('utf-8'), '', '', '', 0)
+            result, errors = zencode_exec(
+                self.script.decode('utf-8'),
+                self.data.decode('utf-8'),
+                self.keys.decode('utf-8'),
+                self.conf.decode('utf-8'),
+                0)
             if len(errors) > 0:
                 print(errors)
                 return False

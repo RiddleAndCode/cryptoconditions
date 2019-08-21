@@ -42,6 +42,9 @@
 
         ZenroomSha512Fulfillment ::= SEQUENCE {
           script               OCTET STRING,
+          data                 OCTET STRING,
+          keys                 OCTET STRING,
+          conf                 OCTET STRING,
         }
 
     END
@@ -91,6 +94,21 @@ ZenroomSha512Fulfillment.componentType = NamedTypes(
         'script',
         OctetString().subtype(
             implicitTag=Tag(tagClassContext, tagFormatSimple, 0)),
+    ),
+    NamedType(
+        'data',
+        OctetString().subtype(
+            implicitTag=Tag(tagClassContext, tagFormatSimple, 1)),
+    ),
+    NamedType(
+        'keys',
+        OctetString().subtype(
+            implicitTag=Tag(tagClassContext, tagFormatSimple, 2)),
+    ),
+    NamedType(
+        'conf',
+        OctetString().subtype(
+            implicitTag=Tag(tagClassContext, tagFormatSimple, 3)),
     ),
 )
 
