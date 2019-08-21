@@ -1,8 +1,6 @@
 import base58
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 
-from nacl.signing import VerifyKey, SigningKey
-from nacl.exceptions import BadSignatureError
 from pyasn1.codec.der.encoder import encode as der_encode
 from pyasn1.codec.native.decoder import decode as nat_decode
 
@@ -10,6 +8,9 @@ from cryptoconditions.crypto import base64_add_padding, base64_remove_padding
 from cryptoconditions.types.base_sha256 import BaseSha256
 from cryptoconditions.schemas.fingerprint import ZenroomFingerprintContents
 
+from zenroom.zenroom import zencode_exec, ZenroomException
+
+import pdb
 
 class ZenroomSha256(BaseSha256):
     """ """
@@ -26,7 +27,7 @@ class ZenroomSha256(BaseSha256):
     SIGNATURE_LENGTH = 64
 
     # TODO docstrings
-    def __init__(self, *, public_key=None, signature=None):
+    def __init__(self, *, script=None, data=None, keys=None, conf=None):
         """
         ZENROOM: Zenroom signature condition.
 
@@ -40,84 +41,75 @@ class ZenroomSha256(BaseSha256):
             signature (bytes): Signature.
 
         """
-        if public_key is not None:
-            self._validate_public_key(public_key)
-        self._public_key = public_key
-        if signature is not None:
-            self._validate_signature(signature)
-        self._signature = signature
+        self.script = script
+        self.data = data
+        self.keys = keys
+        self.conf = conf
 
-    # TODO check type or use static typing (mypy)
-    def _validate_public_key(self, public_key):
-        if not isinstance(public_key, bytes):
-            raise TypeError('public_key must be bytes')
-        if len(public_key) != self.PUBLIC_KEY_LENGTH:
-            raise ValueError(
-                'Public key must be {} bytes, was: {}'.format(
-                    self.PUBLIC_KEY_LENGTH, len(public_key)))
-        # TODO More validation? Ask ILP folks.
-        return public_key
+    # TODO validate script
+    def _validate_script(self, script):
+        return script
 
     @property
-    def public_key(self):
-        return self._public_key
+    def script(self):
+        return self._script
 
-    @public_key.setter
-    # TODO check type or use static typing (mypy)
-    def public_key(self, public_key):
-        self._public_key = self._validate_public_key(public_key)
+    @script.setter
+    def script(self, script):
+        self._script = self._validate_script(script)
 
-    # TODO check type or use static typing (mypy)
-    def _validate_signature(self, signature):
-        if not isinstance(signature, bytes):
-            raise TypeError('signature must be bytes')
-        if len(signature) != self.SIGNATURE_LENGTH:
-            raise Exception(
-                'Signature must be {} bytes, was: {}'.format(
-                    self.SIGNATURE_LENGTH, len(signature)))
-        return signature
+    # TODO validate data
+    def _validate_data(self, data):
+        return data
 
     @property
-    def signature(self):
-        return self._signature
+    def data(self):
+        return self._data
 
-    @signature.setter
-    # TODO check type or use static typing (mypy)
-    # def signature(self, signature: bytes) -> None:
-    def signature(self, signature):
-        self._signature = self._validate_signature(signature)
+    @data.setter
+    def data(self, data):
+        self._data = self._validate_data(data)
+
+    # TODO validate keys
+    def _validate_keys(self, keys):
+        return keys
+
+    @property
+    def keys(self):
+        return self._keys
+
+    @keys.setter
+    def keys(self, keys):
+        self._keys = self._validate_keys(keys)
+
+    # TODO validate conf
+    def _validate_conf(self, conf):
+        return conf
+
+    @property
+    def conf(self):
+        return self._conf
+
+    @conf.setter
+    def conf(self, conf):
+        self._conf = self._validate_conf(conf)
+
 
     @property
     def asn1_dict_payload(self):
-        return {'publicKey': self.public_key, 'signature': self.signature}
+        return {'script': self.script}
 
     @property
     def fingerprint_contents(self):
         asn1_fingerprint_obj = nat_decode(
-            {'publicKey': self.public_key},
+            {'script': self.script},
             asn1Spec=ZenroomFingerprintContents(),
         )
         return der_encode(asn1_fingerprint_obj)
 
-    # TODO check types or use static typing (mypy)
-    def sign(self, message, private_key):
-        """
-        Sign the message.
-
-        This method will take the currently configured values for the message
-        prefix and suffix and create a signature using the provided Zenroom private key.
-
-        Args:
-            message (bytes): message to be signed
-            private_key (bytes) Zenroom private key
-
-        """
-        sk = SigningKey(private_key)
-        self.public_key = sk.verify_key.encode()
-        self.signature = sk.sign(message).signature
-        return self.signature
 
     def calculate_cost(self):
+        # TODO needs to be modified ???
         return ZenroomSha256.CONSTANT_COST
 
     def to_asn1_dict(self):
@@ -134,8 +126,7 @@ class ZenroomSha256(BaseSha256):
         """
         return {
             'type': ZenroomSha256.TYPE_NAME,
-            'public_key': base58.b58encode(self.public_key),
-            'signature': base58.b58encode(self.signature) if self.signature else None
+            'script': base58.b58encode(self.script),
         }
 
     # TODO Adapt according to outcomes of
@@ -149,10 +140,8 @@ class ZenroomSha256(BaseSha256):
         """
         return {
             'type': ZenroomSha256.TYPE_NAME,
-            'public_key': base64_remove_padding(
+            'script': base64_remove_padding(
                 urlsafe_b64encode(self.public_key)),
-            'signature': base64_remove_padding(
-                urlsafe_b64encode(self.signature)) if self.signature else None
         }
 
     # TODO Adapt according to outcomes of
@@ -167,9 +156,7 @@ class ZenroomSha256(BaseSha256):
         Returns:
             Fulfillment
         """
-        self.public_key = base58.b58decode(data['public_key'])
-        if data['signature']:
-            self.signature = base58.b58decode(data['signature'])
+        self.script = base58.b58decode(data['script'])
 
     # TODO Adapt according to outcomes of
     # https://github.com/rfcs/crypto-conditions/issues/16
@@ -183,16 +170,13 @@ class ZenroomSha256(BaseSha256):
         Returns:
             Fulfillment
         """
-        self.public_key = urlsafe_b64decode(base64_add_padding(
-            data['publicKey']))
-        self.signature = urlsafe_b64decode(base64_add_padding(
-            data['signature']))
+        self.script = urlsafe_b64decode(base64_add_padding(
+            data['script']))
 
     def parse_asn1_dict_payload(self, data):
-        self.public_key = data['publicKey']
-        self.signature = data['signature']
+        self.script = data['script']
 
-    def validate(self, *, message):
+    def validate(self, message):
         """
         Verify the signature of this Zenroom fulfillment.
 
@@ -206,9 +190,13 @@ class ZenroomSha256(BaseSha256):
             boolean: Whether this fulfillment is valid.
         """
         try:
-            returned_message = VerifyKey(self.public_key).verify(
-                message, signature=self.signature)
-        except BadSignatureError:
+            result, errors = zencode_exec(self.script.decode('utf-8'), '', '', '', 0)
+            if len(errors) > 0:
+                print(errors)
+                return False
+            print(result)
+        except ZenroomException:
             return False
-        # TODO Check returned message against given message
-        return True
+
+        print("VALID")
+        return False

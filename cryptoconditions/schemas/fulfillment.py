@@ -41,8 +41,7 @@
         }
 
         ZenroomSha512Fulfillment ::= SEQUENCE {
-          publicKey            OCTET STRING (SIZE(32)),
-          signature            OCTET STRING (SIZE(64))
+          script               OCTET STRING,
         }
 
     END
@@ -89,16 +88,9 @@ class ZenroomSha512Fulfillment(Sequence):
 
 ZenroomSha512Fulfillment.componentType = NamedTypes(
     NamedType(
-        'publicKey',
+        'script',
         OctetString().subtype(
-            subtypeSpec=ValueSizeConstraint(32, 32)).subtype(
-                implicitTag=Tag(tagClassContext, tagFormatSimple, 0)),
-    ),
-    NamedType(
-        'signature',
-        OctetString().subtype(
-            subtypeSpec=ValueSizeConstraint(64, 64)).subtype(
-                implicitTag=Tag(tagClassContext, tagFormatSimple, 1)),
+            implicitTag=Tag(tagClassContext, tagFormatSimple, 0)),
     ),
 )
 
