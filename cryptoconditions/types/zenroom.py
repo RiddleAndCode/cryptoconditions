@@ -8,7 +8,8 @@ from cryptoconditions.crypto import base64_add_padding, base64_remove_padding
 from cryptoconditions.types.base_sha256 import BaseSha256
 from cryptoconditions.schemas.fingerprint import ZenroomFingerprintContents
 
-from zenroom.zenroom import zencode_exec, ZenroomException
+from cryptoconditions.zencode import read_zencode
+from zenroom_minimal import Zenroom
 
 import pdb
 
@@ -27,6 +28,7 @@ class ZenroomSha256(BaseSha256):
     SIGNATURE_LENGTH = 64
 
     # TODO docstrings
+    # TODO is conf necessary?
     def __init__(self, *, script=None, data=None, keys=None, conf=None):
         """
         ZENROOM: Zenroom signature condition.
@@ -215,22 +217,20 @@ class ZenroomSha256(BaseSha256):
         Return:
             boolean: Whether this fulfillment is valid.
         """
+        zenroom = Zenroom(read_zencode)
+
         print(self.script)
         print(self.data)
         print(self.keys)
         print(self.conf)
+
         try:
-            result, errors = zencode_exec(
-                self.script.decode('utf-8'),
-                self.data.decode('utf-8'),
-                self.keys.decode('utf-8'),
-                self.conf.decode('utf-8'),
-                0)
-            if len(errors) > 0:
-                print(errors)
-                return False
+            zenroom.load(self.script.decode('utf-8'))
+            zenroom.load_data(self.data.decode('utf-8'))
+            zenroom.load_keys(self.keys.decode('utf-8'))
+            result = zenroom.eval()
             print(result)
-        except ZenroomException:
+        except:
             return False
 
         print("VALID")
