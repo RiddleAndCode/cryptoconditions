@@ -8,6 +8,7 @@ from cryptoconditions.types.zenroom import ZenroomSha256
 from cryptoconditions.fulfillment import Fulfillment    # noqa: W0611
 from cryptoconditions.condition import Condition        # noqa: W0611
 from cryptoconditions.exceptions import ValidationError
+from cryptoconditions.zencode import read_zencode
 
 
 TypeRegistry.register_type(PreimageSha256)
