@@ -44,7 +44,7 @@
           script               OCTET STRING,
           data                 OCTET STRING,
           keys                 OCTET STRING,
-          conf                 OCTET STRING,
+          # conf                 OCTET STRING,
         }
 
     END
@@ -105,11 +105,11 @@ ZenroomSha512Fulfillment.componentType = NamedTypes(
         OctetString().subtype(
             implicitTag=Tag(tagClassContext, tagFormatSimple, 2)),
     ),
-    NamedType(
-        'conf',
-        OctetString().subtype(
-            implicitTag=Tag(tagClassContext, tagFormatSimple, 3)),
-    ),
+    # NamedType(
+    #     'conf',
+    #     OctetString().subtype(
+    #         implicitTag=Tag(tagClassContext, tagFormatSimple, 3)),
+    # ),
 )
 
 

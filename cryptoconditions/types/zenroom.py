@@ -103,7 +103,7 @@ class ZenroomSha256(BaseSha256):
             'script': self.script,
             'data': self.data,
             'keys': self.keys,
-            'conf': self.conf,
+            # 'conf': self.conf,
         }
 
     @property
@@ -136,7 +136,7 @@ class ZenroomSha256(BaseSha256):
             'script': base58.b58encode(self.script),
             'data': base58.b58encode(self.data),
             'keys': base58.b58encode(self.keys),
-            'conf': base58.b58encode(self.conf),
+            # 'conf': base58.b58encode(self.conf),
         }
 
     # TODO Adapt according to outcomes of
@@ -156,8 +156,8 @@ class ZenroomSha256(BaseSha256):
                 urlsafe_b64encode(self.data)),
             'keys': base64_remove_padding(
                 urlsafe_b64encode(self.keys)),
-            'conf': base64_remove_padding(
-                urlsafe_b64encode(self.conf)),
+            # 'conf': base64_remove_padding(
+            #     urlsafe_b64encode(self.conf)),
         }
 
     # TODO Adapt according to outcomes of
@@ -175,7 +175,7 @@ class ZenroomSha256(BaseSha256):
         self.script = base58.b58decode(data['script'])
         self.data = base58.b58decode(data['data'])
         self.keys = base58.b58decode(data['keys'])
-        self.conf = base58.b58decode(data['conf'])
+        # self.conf = base58.b58decode(data['conf'])
 
     # TODO Adapt according to outcomes of
     # https://github.com/rfcs/crypto-conditions/issues/16
@@ -195,14 +195,14 @@ class ZenroomSha256(BaseSha256):
             data['data']))
         self.keys = urlsafe_b64decode(base64_add_padding(
             data['keys']))
-        self.conf = urlsafe_b64decode(base64_add_padding(
-            data['conf']))
+        # self.conf = urlsafe_b64decode(base64_add_padding(
+        #     data['conf']))
 
     def parse_asn1_dict_payload(self, data):
         self.script = data['script']
         self.data = data['data']
         self.keys = data['keys']
-        self.conf = data['conf']
+        # self.conf = data['conf']
 
     def validate(self, *, message):
         """
@@ -218,18 +218,15 @@ class ZenroomSha256(BaseSha256):
             boolean: Whether this fulfillment is valid.
         """
         zenroom = Zenroom(read_zencode)
-
-        print(self.script)
-        print(self.data)
-        print(self.keys)
-        print(self.conf)
+        script = self.script.decode('utf-8')
+        message = urlsafe_b64encode(message)[0:-1].decode('utf-8')
+        signature = self.data.decode('utf-8')
 
         try:
-            zenroom.load(self.script.decode('utf-8'))
-            zenroom.load_data(self.data.decode('utf-8'))
-            zenroom.load_keys(self.keys.decode('utf-8'))
-            result = zenroom.eval()
-            print(result)
+            zenroom.load(script)
+            # TODO make configurable with json / dict merging instead of lua table interpolating
+            zenroom.load_data("{ message = '%s', signature = '%s' }" %(message, signature))
+            zenroom.eval()
         except:
             return False
 
