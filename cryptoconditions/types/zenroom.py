@@ -35,12 +35,13 @@ class ZenroomSha256(BaseSha256):
 
         This condition implements Zenroom signatures.
 
-        ZENROOM is assigned the type ID 4. It relies only on the ZENROOM feature suite
-        which corresponds to a bitmask of 0x20.
+        ZENROOM is assigned the type ID 5.
 
         Args:
-            public_key (bytes): Zenroom public key.
-            signature (bytes): Signature.
+            script (bytes): Zenroom script
+            data (bytes): Signature. (TODO more configurable)
+            keys (bytes): Keyring dictionary. (TODO actually use)
+            conf (bytes): Configuration. (TODO actually use)
 
         """
         self.script = script
@@ -209,7 +210,7 @@ class ZenroomSha256(BaseSha256):
         Verify the signature of this Zenroom fulfillment.
 
         The signature of this Zenroom fulfillment is verified against
-        the provided message and public key.
+        the provided message and script.
 
         Args:
             message (str): Message to validate against.
