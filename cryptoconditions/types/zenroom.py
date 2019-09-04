@@ -230,5 +230,4 @@ class ZenroomSha256(BaseSha256):
         except:
             return False
 
-        print("VALID")
-        return False
+        return True
