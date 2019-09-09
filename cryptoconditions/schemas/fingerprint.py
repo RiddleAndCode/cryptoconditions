@@ -29,6 +29,10 @@
           publicKey            OCTET STRING (SIZE(32))
         }
 
+        ZenroomFingerprintContents ::= SEQUENCE {
+          script               OCTET STRING
+        }
+
     END
 
 """
@@ -48,6 +52,14 @@ class Ed25519FingerprintContents(Sequence):
             OctetString().subtype(
                 subtypeSpec=ValueSizeConstraint(32, 32)).subtype(
                     implicitTag=Tag(tagClassContext, tagFormatSimple, 0))),
+    )
+
+class ZenroomFingerprintContents(Sequence):
+    componentType = NamedTypes(
+        NamedType(
+            'script',
+            OctetString().subtype(
+                implicitTag=Tag(tagClassContext, tagFormatSimple, 0))),
     )
 
 
