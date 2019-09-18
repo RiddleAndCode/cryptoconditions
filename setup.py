@@ -69,6 +69,7 @@ setup(
     ],
 
     packages=find_packages(exclude=['tests*', 'examples']),
+    include_package_data=True,
 
     install_requires=[
         'base58~=1.0.0',
