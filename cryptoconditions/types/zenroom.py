@@ -174,8 +174,10 @@ class ZenroomSha256(BaseSha256):
             Fulfillment
         """
         self.script = base58.b58decode(data['script'])
-        self.data = base58.b58decode(data['data'])
-        self.keys = base58.b58decode(data['keys'])
+        if data.get('data'):
+            self.data = base58.b58decode(data['data'])
+        if data.get('keys'):
+            self.keys = base58.b58decode(data['keys'])
         # self.conf = base58.b58decode(data['conf'])
 
     # TODO Adapt according to outcomes of

@@ -168,7 +168,7 @@ class Ed25519Sha256(BaseSha256):
             Fulfillment
         """
         self.public_key = base58.b58decode(data['public_key'])
-        if data['signature']:
+        if data.get('signature'):
             self.signature = base58.b58decode(data['signature'])
 
     # TODO Adapt according to outcomes of
