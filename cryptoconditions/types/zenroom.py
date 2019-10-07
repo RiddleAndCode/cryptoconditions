@@ -8,7 +8,7 @@ from cryptoconditions.crypto import base64_add_padding, base64_remove_padding
 from cryptoconditions.types.base_sha256 import BaseSha256
 from cryptoconditions.schemas.fingerprint import ZenroomFingerprintContents
 
-from cryptoconditions.zencode import read_zencode
+from ipdb_zencode import read_zencode
 from zenroom_minimal import Zenroom
 
 import pdb
